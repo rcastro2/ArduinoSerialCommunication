@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<style>
+    .container{
+        display:flex;
+    }
+    .container a{
+        flex:1;
+        text-decoration: none;
+        height:100px;
+        font-size:20px;
+        align-content: center;
+        text-align: center;
+    }
+    .active{
+        background-color:blue;
+        color:white;
+        border:2px solid blue;
+    }
+    .active:hover{
+        border:2px solid white;
+    }
+    .not_active{
+        border:2px solid white;
+    }
+    .not_active:hover{
+        border:2px solid blue;
+    }
+    #banner{
+        height:200px;
+        align-content: center;
+        text-align: center;
+        font-size: 40px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+</style>
+<body>
+
+<div id="banner" class="active">CircuitPlayground Light Switch Interface</div>
+<div class="container">
+<a href="/LED/on" 
+
+{% if info == 'on' %}
+class="active"
+{% else %}
+class="not_active"
+{% endif %}>On</a>
+
+<a href="/LED/off" 
+
+{% if info == 'off' %}
+class="active"
+{% else %}
+class="not_active"
+{% endif %}>Off</a>
+</div>
+
+</body>
+</html>

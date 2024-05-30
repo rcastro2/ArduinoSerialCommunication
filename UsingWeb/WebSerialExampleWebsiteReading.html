@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Serial Data Reader (Polyfill)</title>
+</head>
+<body>
+    <button id="connectButton">Connect to Serial</button>
+    <br>
+    <div id="serialData"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tessel-web-serial@2.3.1/dist/tessel-web-serial.min.js"></script>
+    <script>
+        const connectButton = document.getElementById("connectButton");
+        const serialDataDiv = document.getElementById("serialData");
+
+        let port; // This will hold the serial port object
+
+        connectButton.addEventListener('click', async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 }); // Adjust baudRate if needed
+                connectButton.disabled = true;
+                startReadingData(port);
+            } catch (error) {
+                console.error('Error connecting to serial port:', error);
+            }
+        });
+
+        async function startReadingData(port) {
+            const reader = port.readable.getReader();
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) {
+                        // Port disconnected
+                        break;
+                    }
+                    const decoder = new TextDecoder(); // Use TextDecoder with polyfill
+                    console.log(decoder);
+                    const data = decoder.decode(value);
+                    console.log(data);
+                    serialDataDiv.textContent = data;
+                }
+            } catch (error) {
+                console.error('Error reading from serial port:', error);
+            } finally {
+                reader.releaseLock();
+            }
+        }
+    </script>
+</body>
+</html>

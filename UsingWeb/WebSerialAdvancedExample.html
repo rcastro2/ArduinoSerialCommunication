@@ -7,11 +7,17 @@
 </head>
 <body>
     <button id="connectButton">Connect to Serial</button>
+    <hr>
+    Adjust Brightness: <input type="range" min="1" max="20" id="brightness"/>
+    <br>
+    <input type="text" id="red" placeholder="Enter the amount of red"/>
+    <input type="text" id="green" placeholder="Enter the amount of green"/>
+    <input type="text" id="blue" placeholder="Enter the amount of blue"/>
     <br>
     <button id="ledOnButton">Turn LED On</button>
     <button id="ledOffButton">Turn LED Off</button>
-    <br>
-    <div id="serialData"></div>
+    <hr>
+    <span id="serialData" style="background-color: white;color:black;padding:5px;"></span>
     
     <script src="https://cdn.jsdelivr.net/npm/tessel-web-serial@2.3.1/dist/tessel-web-serial.min.js"></script>
     <script>
@@ -37,7 +43,8 @@
         });
 
         ledOnButton.addEventListener('click', async () => {
-            await writeData(port, '1'); // Send '1' to turn on LED (replace with your Arduino logic)
+            let color = `${red.value},${green.value},${blue.value},${brightness.value}`;
+            await writeData(port, color); // Send '1' to turn on LED (replace with your Arduino logic)
         });
 
         ledOffButton.addEventListener('click', async () => {
@@ -61,7 +68,13 @@
                     }
                     const decoder = new TextDecoder(); // Use TextDecoder with polyfill
                     const data = decoder.decode(value);
+                    let colors = data.split(",");
+                    let r = parseInt(colors[0]);
+                    let g = parseInt(colors[1]);
+                    let b = parseInt(colors[2]);
                     serialDataDiv.textContent = data;
+                    document.body.style.backgroundColor = `rgb(${r},${g},${b})`;
+
                 }
             } catch (error) {
                 console.error('Error reading from serial port:', error);

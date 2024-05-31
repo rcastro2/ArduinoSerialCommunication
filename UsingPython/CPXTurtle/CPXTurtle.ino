@@ -4,9 +4,9 @@ void setup() {
   // put your setup code here, to run once:
   CircuitPlayground.begin();
 }
-void colorAll(int pos){
-  for(int x = 0; x < 10; x++){
-    CircuitPlayground.setPixelColor(x, CircuitPlayground.colorWheel(pos));
+void colorAll(int c){
+  for(int i = 0; i < 10; i++){
+    CircuitPlayground.setPixelColor(i, CircuitPlayground.colorWheel(c));
   }
 }
 bool readCap(int pos){

@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Serial Data Reader (Polyfill)</title>
+    <title>Web Serial LED Control</title>
 </head>
 <body>
     <button id="connectButton">Connect to Serial</button>
-    <br>
-    <div id="serialData"></div>
+    <hr>
 
+    <input type="text" id="data" placeholder="Enter index (0-255) to color wheel"/>
+
+    <button id="sendButton">Send</button>
+ 
+    <hr>
+    <span id="serialData"></span>
+    
     <script src="https://cdn.jsdelivr.net/npm/tessel-web-serial@2.3.1/dist/tessel-web-serial.min.js"></script>
     <script>
         const connectButton = document.getElementById("connectButton");
+        const sendButton = document.getElementById("sendButton");
         const serialDataDiv = document.getElementById("serialData");
+        let decoder = null;
 
         let port; // This will hold the serial port object
 
@@ -28,6 +36,17 @@
             }
         });
 
+        sendButton.addEventListener('click', async () => {
+            console.log(data.value);
+            await writeData(port, data.value); // Send the color wheel index
+        });
+
+        async function writeData(port, data) {
+            const encoder = new TextEncoder();
+            const writer = port.writable.getWriter();
+            await writer.write(encoder.encode(data));
+            writer.releaseLock();
+        }
         async function startReadingData(port) {
             const reader = port.readable.getReader();
             try {
@@ -38,10 +57,9 @@
                         break;
                     }
                     const decoder = new TextDecoder(); // Use TextDecoder with polyfill
-                    console.log(decoder);
                     const data = decoder.decode(value);
-                    console.log(data);
                     serialDataDiv.textContent = data;
+                    document.body.style.backgroundColor = data;
                 }
             } catch (error) {
                 console.error('Error reading from serial port:', error);

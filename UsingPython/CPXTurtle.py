@@ -2,7 +2,9 @@ import serial
 import time
 import turtle
 
-arduino = serial.Serial(port='COM62',  baudrate=9600, timeout=.1)
+cpx_port = input("Enter the COM port to the CPX:")
+arduino = serial.Serial(port=f'COM{cpx_port}',  baudrate=9600, timeout=.1)
+
 bob = turtle.Turtle()
 bob.width(5)
 bob.speed(10)

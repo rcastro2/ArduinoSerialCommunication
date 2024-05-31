@@ -3,7 +3,9 @@ from flask import render_template
 import serial
 
 app = Flask(__name__)
-arduino = serial.Serial(port='COM62',  baudrate=9600, timeout=.1)
+
+cpx_port = input("Enter the COM port to the CPX:")
+arduino = serial.Serial(port=f'COM{cpx_port}',  baudrate=9600, timeout=.1)
 
 @app.route("/")
 def index():
@@ -35,4 +37,4 @@ def rendered_switch(led_state=None):
         arduino.write(bytes('0',  'utf-8'))
         
     return render_template("lightSwitch.html",info=led_state)
-#>python -m flask --app serialServer run --host=0.0.0.0
+#>python -m flask --app CPX run --host=0.0.0.0

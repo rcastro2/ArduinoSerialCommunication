@@ -10,7 +10,6 @@ void setup() {
 }
 void loop() {
   while (!Serial.available());
-  CircuitPlayground.clearPixels();
   c = Serial.readString().toInt();
   colorAll(c);
   t++;

@@ -5,7 +5,7 @@ from gamelib import *
 cpx_port = input("Enter the COM port to the CPX:")
 arduino = serial.Serial(port=f'COM{cpx_port}',  baudrate=9600, timeout=.1)
 
-game = Game(600,384,"Paddle Game")
+game = Game(660,384,"Paddle Game")
 bk = Animation("background17SpriteSheet.png",8,game,5120/5,768/2,4)
 ball = Image("globe.png",game)
 ball.resizeBy(-90)
@@ -46,6 +46,7 @@ while not game.over:
     paddle1.score += 1
 
   if ball.y > game.height - 20:
+    arduino.write(bytes('h','utf-8'))
     paddle1.health -= 10
     ball.moveTo(game.width / 2, game.height / 2)
 
@@ -53,6 +54,7 @@ while not game.over:
     game.over = True
 
   if ball.collidedWith(paddle1,"rectangle"):
+    arduino.write(bytes('b','utf-8'))
     ball.changeYSpeed()
     ball.y -= ball.speed
     ball.speed += 0.5

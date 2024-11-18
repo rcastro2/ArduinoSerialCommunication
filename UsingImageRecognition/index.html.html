@@ -1,0 +1,131 @@
+<html>
+    <style>
+        *{
+            font-family:Arial;
+        }
+        .container{
+            display:flex;
+        }
+        .center{
+            justify-content: center;
+            align-items:center;
+        }
+        canvas{
+            border-radius:10px;
+            margin:20px;
+            box-shadow:2px 2px 2px black;
+        }
+    </style>
+    <body>
+        <div class="container center">
+            <div style="background-color:darkturquoise;padding:20px">
+                <h1>Image Recognition to Arduino Communication</h1>
+                <hr>
+                <button type="button" onclick="init()">Start Image Recognition</button>
+                <hr>
+                <button id="connectButton">Connect to Arduino via Serial Port</button> 
+                <button id="sendButton">Send Prediction to Arduino Manually</button>
+                <hr>
+                <div class="container center" style="flex-direction:column">
+                    <div id="webcam-container"></div>
+                    <div id="label-container"></div>
+                    <div id="currentPrediction"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tessel-web-serial@2.3.1/dist/tessel-web-serial.min.js"></script>
+    <script type="text/javascript">
+        let model, webcam, labelContainer, maxPredictions, currentPrediction = "", oldPrediction = "", port;
+        
+        const URL = "./tm-my-image-model/";
+        const connectButton = document.getElementById("connectButton");
+        const sendButton = document.getElementById("sendButton");
+           
+        // Arduino Communiction Code
+        connectButton.addEventListener('click', async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 9600 }); // Adjust baudRate if needed
+                connectButton.disabled = true;
+                loop_ArduinoCommunication();
+            } catch (error) {
+                console.error('Error connecting to serial port:', error);
+            }
+        });
+        async function writeData(port, data) {
+            const encoder = new TextEncoder();
+            const writer = port.writable.getWriter();
+            await writer.write(encoder.encode(data));
+            writer.releaseLock();
+        }
+        sendButton.addEventListener('click', async () => {
+            //console.log(data.value);
+            await writeData(port, currentPrediction); // Send the color wheel index
+        });
+        async function loop_ArduinoCommunication() {
+            //Communication to Arduino
+            if(currentPrediction != oldPrediction){
+                oldPrediction = currentPrediction;
+                await writeData(port, currentPrediction);
+            }
+            setTimeout(loop_ArduinoCommunication,500);
+        }
+
+        //Image Recognition Code
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+    
+            // load the model and metadata
+            // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+            // or files from your local hard drive
+            // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+    
+            // Convenience function to setup a webcam
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+            await webcam.setup(); // request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop_ImageRecognition);
+    
+            // append elements to the DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) { // and class labels
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+    
+        async function loop_ImageRecognition() {
+            webcam.update(); // update the webcam frame
+            await predict();       
+            window.requestAnimationFrame(loop_ImageRecognition);
+        }
+    
+        // run the webcam image through the image model
+        async function predict() {
+            // predict can take in an image, video or canvas html element
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                if(prediction[i].probability > 0.9){
+                    if(prediction[i].className == "LeftHand"){
+                        currentPrediction = 1;
+                    }else if(prediction[i].className == "RightHand"){
+                        currentPrediction = 250;
+                    }else{
+                        currentPrediction = 128;
+                    }
+                    //currentPrediction = prediction[i].className;
+                }
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+            document.getElementById("currentPrediction").innerHTML = "<h1>" + currentPrediction + "</h1>";
+        }
+    </script>
+</html>

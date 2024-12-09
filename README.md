@@ -32,3 +32,8 @@ This project explores how to communicate between two CircuitPlayground Express b
 <p>
 There are two programs included in this project.  CPXtoCPXSerialCommunication program allows you to control the color of the NeoPixels on the other CircuitPlayground Express by transmitting an index to the color wheel.  CatchTheNeoPixel program is a game where you go head to head to see who can catch the yellow NeoPixel five times first. Use the left and right buttons to spin around the CircuitPlayground Express.
 </p>
+<h2>Using Image Recognition</h2>
+<p>
+This project expands on the basic concepts developed in <a href="https://github.com/rcastro2/ArduinoSerialCommunication/tree/master/UsingWeb" target="_blank">Using Web</a> project of this repository to include an Image Recognition interface for communicating with the CircuitPlayground Express.  The Image Recognition component of this projects was accomplished using <a href="https://teachablemachine.withgoogle.com/" target="_blank">Teachable Machine With Google</a>.  There are two buttons on index.html to handle the connection to the CircuitPlayground Express via the WebSerial API and the initiation of the Image Recognition code.  Once started you will be able to change the color on the CircuitPlayground Express by raising left or right hand.
+</p>
+
